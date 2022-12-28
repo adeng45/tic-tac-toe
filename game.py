@@ -22,7 +22,7 @@ class Game:
         self.board.mark(row, col, self.player)
         self.switchPlayer()
         self.history.append( (row, col) )
-        self.board.show()
+        # self.board.show()
 
     def switchPlayer(self):
         if (self.player == 'X'):

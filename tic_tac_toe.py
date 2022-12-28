@@ -1,6 +1,5 @@
 import sys
 import pygame
-import numpy as np
 
 from game import Game
 from constants import * 
@@ -31,7 +30,13 @@ def drawBoard(game):
 
         # X
         if (player == 'X'):
-            pass
+            topLeft = (col * SQUARE_SIZE + OFFSET, row * SQUARE_SIZE + OFFSET)
+            bottomRight = (col * SQUARE_SIZE + SQUARE_SIZE - OFFSET, row * SQUARE_SIZE + SQUARE_SIZE - OFFSET)
+            pygame.draw.line(screen, CROSS_COLOR, topLeft, bottomRight, CROSS_WIDTH)
+
+            topRight = (col * SQUARE_SIZE + SQUARE_SIZE - OFFSET, row * SQUARE_SIZE + OFFSET)
+            bottomLeft = (col * SQUARE_SIZE + OFFSET, row * SQUARE_SIZE + SQUARE_SIZE - OFFSET)
+            pygame.draw.line(screen, CROSS_COLOR, topRight, bottomLeft, CROSS_WIDTH)
 
         # O
         elif (player == 'O'):
