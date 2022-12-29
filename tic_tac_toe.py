@@ -1,7 +1,9 @@
 import sys
 import pygame
+from pygame import gfxdraw
 
 from game import Game
+from ai import AI
 from constants import * 
 
 #Initialization 
@@ -14,12 +16,12 @@ screen.fill(BOARD_COLOR)
 def drawLines():
 
     #Horizontal
-    pygame.draw.line(screen, LINE_COLOR, (0, SQUARE_SIZE), (WIDTH, SQUARE_SIZE), LINE_WIDTH)
-    pygame.draw.line(screen, LINE_COLOR, (0, 2 * SQUARE_SIZE), (WIDTH, 2 * SQUARE_SIZE), LINE_WIDTH)
+    for i in range(1, ROWS):
+        pygame.draw.line(screen, LINE_COLOR, (0, i * SQUARE_SIZE), (WIDTH, i * SQUARE_SIZE), LINE_WIDTH)
 
     #Vertical
-    pygame.draw.line(screen, LINE_COLOR, (SQUARE_SIZE, 0), (SQUARE_SIZE, HEIGHT), LINE_WIDTH)
-    pygame.draw.line(screen, LINE_COLOR, (2* SQUARE_SIZE, 0), (2* SQUARE_SIZE, HEIGHT), LINE_WIDTH)
+    for j in range(1, COLS):
+        pygame.draw.line(screen, LINE_COLOR, (j * SQUARE_SIZE, 0), (j * SQUARE_SIZE, HEIGHT), LINE_WIDTH)
 
 
 def drawBoard(game):
@@ -34,9 +36,9 @@ def drawBoard(game):
             bottomRight = (col * SQUARE_SIZE + SQUARE_SIZE - OFFSET, row * SQUARE_SIZE + SQUARE_SIZE - OFFSET)
             pygame.draw.line(screen, CROSS_COLOR, topLeft, bottomRight, CROSS_WIDTH)
 
-            topRight = (col * SQUARE_SIZE + SQUARE_SIZE - OFFSET, row * SQUARE_SIZE + OFFSET)
             bottomLeft = (col * SQUARE_SIZE + OFFSET, row * SQUARE_SIZE + SQUARE_SIZE - OFFSET)
-            pygame.draw.line(screen, CROSS_COLOR, topRight, bottomLeft, CROSS_WIDTH)
+            topRight = (col * SQUARE_SIZE + SQUARE_SIZE - OFFSET, row * SQUARE_SIZE + OFFSET)
+            pygame.draw.line(screen, CROSS_COLOR, bottomLeft, topRight, CROSS_WIDTH)
 
         # O
         elif (player == 'O'):
@@ -48,9 +50,13 @@ def drawBoard(game):
             continue
     
 game = Game()
+ai = AI(1)
+
+time = 0
 
 def main():
 
+    time = 0
     while True:
 
         drawLines()
@@ -65,9 +71,15 @@ def main():
                 row = int(pos[1] // SQUARE_SIZE)
                 col = int(pos[0] // SQUARE_SIZE)
 
+
                 game.mark(row, col)
+                cost, move = ai.findMove(game)
+                row, col = move
+                game.mark(row, col)
+                
 
         drawBoard(game)
         pygame.display.update()
 
+        
 main()

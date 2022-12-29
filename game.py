@@ -4,11 +4,14 @@ from constants import *
 class Game:
     
     def __init__(self):
-        self.history = []
-        self.AI = False
+        self.ai = False
         self.player = 'X'
         self.board = Board()
         pass
+
+
+    def toMove(self):
+        return self.player
 
     def get(self, row, col):
         return self.board(row, col)
@@ -21,14 +24,21 @@ class Game:
 
         self.board.mark(row, col, self.player)
         self.switchPlayer()
-        self.history.append( (row, col) )
         # self.board.show()
+
+    def unmark(self, row, col):
+        self.board.unmark(row, col)
+        self.switchPlayer()
 
     def switchPlayer(self):
         if (self.player == 'X'):
             self.player = 'O'
         else:
             self.player = 'X'
+
+    def isOver(self):
+        return self.board.winner() != '' or self.board.isFull()
+    
 
     
 

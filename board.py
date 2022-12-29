@@ -5,9 +5,26 @@ class Board:
 
     def __init__(self):
         self.arr = np.full( (ROWS, COLS) , '?')
+        self.emptySquares = set()
+        for row in range(ROWS):
+            for col in range(COLS):
+                self.emptySquares.add( (row, col) )
+
+
+    def getEmptySquares(self):
+        return self.emptySquares
+
+    def isFull(self):
+        return len(self.emptySquares) == 0
+
+    def unmark(self, row, col):
+        self.arr[row][col] = '?'
+        self.emptySquares.add( (row, col) )
+
 
     def mark(self, row, col, who):
         self.arr[row][col] = who
+        self.emptySquares.remove( (row, col) )
 
     def clear(self):
         self.arr = np.full( (ROWS, COLS) , '?')
@@ -34,7 +51,40 @@ class Board:
             for col in range(COLS):
                 yield (row, col, self.get(row, col))
 
+    def winner(self):
 
+        #Horizontal wins
+        for row in range(ROWS):
+            for col in range(1, COLS):
+                if (self.get(row, col) != self.get(row, col - 1)):
+                    break
+                if (col == COLS - 1 and self.get(row, col) != '?'):
+                    return self.get(row, col)
+
+        #Vertical wins
+        for col in range(COLS):
+            for row in range(1, ROWS):
+                if (self.get(row, col) != self.get(row - 1, col)):
+                    break
+                if (row == ROWS - 1 and self.get(row, col) != '?'):
+                    return self.get(row, col)
+
+        #Top-left to bottom-right diagonal
+        for i in range(1, ROWS):
+            if (self.get(i, i) != self.get(i - 1, i - 1)):
+                break
+            if (i == ROWS - 1 and self.get(i, i) != '?'):
+                return self.get(i, i)
+
+
+        #Top-right to bottom-left diagonal
+        for i in range(1, ROWS):
+            if (self.get(i, ROWS - 1 - i) != self.get(i - 1, (ROWS - 1 - i) + 1)):
+                break
+            if (i == ROWS - 1 and self.get(i, ROWS - 1 - i) != '?'):
+                return self.get(i, ROWS - 1 - i)
+
+        return ''
 
                 
 # Board().show()
