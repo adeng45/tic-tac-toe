@@ -73,13 +73,22 @@ def main():
 
 
                 game.mark(row, col)
-                cost, move = ai.findMove(game)
+                move = ai.bestMove(game)
                 row, col = move
                 game.mark(row, col)
                 
 
         drawBoard(game)
         pygame.display.update()
+
+
+# game.mark(0, 1)
+# game.mark(2, 2)
+# game.mark(1, 1)
+# game.board.show()
+# cost, move = ai.findMove(game)
+
+
 
         
 main()

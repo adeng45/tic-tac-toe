@@ -9,6 +9,16 @@ class Board:
         for row in range(ROWS):
             for col in range(COLS):
                 self.emptySquares.add( (row, col) )
+        
+    
+    def deepCopy(self):
+
+        board = Board()
+
+        for row, col, player in self.fetch():
+            board.mark(row, col, player)
+
+        return board
 
 
     def getEmptySquares(self):
@@ -22,8 +32,8 @@ class Board:
         self.emptySquares.add( (row, col) )
 
 
-    def mark(self, row, col, who):
-        self.arr[row][col] = who
+    def mark(self, row, col, player):
+        self.arr[row][col] = player
         self.emptySquares.remove( (row, col) )
 
     def clear(self):

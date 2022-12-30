@@ -10,7 +10,7 @@ class Game:
         pass
 
 
-    def toMove(self):
+    def nextToMove(self):
         return self.player
 
     def get(self, row, col):
