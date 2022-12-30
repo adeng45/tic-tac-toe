@@ -13,12 +13,29 @@ class AI:
 
         return empty[idx]
 
+    #Handles comparison between two values dependent on min/max objective
+    def comp(self, cost, currCost, isMax):
+        
+        if (isMax):
+            return cost > currCost
+
+        else:
+            return cost < currCost
+
+
+    def playerSwitch(self, player):
+        if (player == 'X'):
+            return 'O'
+
+        else:
+            return 'X'
+
     #Returns the value of the game without looking into future possibilities
-    def staticEval(self, board, player):
+    def staticEval(self, board):
 
         winner = board.winner()
 
-        if (winner == player):
+        if (winner == 'X'):
             return 1
 
         elif (winner != ''):
@@ -28,19 +45,10 @@ class AI:
            return 0
 
 
-    # Returns favorability of the game, looks at the future search space
-    def evalGame(self, game):
-
-        #Could avoid this copying to save memory, but this is safer
-        board = game.board.deepCopy()
-
-        return self.evalBoard(board, True, game.nextToMove())
-
-    
     # Helper function for evalGame, evaluates the board
     def evalBoard(self, board, isMax, player):
 
-        value = self.staticEval(board, player)
+        value = self.staticEval(board)
 
         if (value == -1 or value == 1 or board.isFull()):
             return value
@@ -50,22 +58,14 @@ class AI:
         #Explore search space with backtracking
         for row, col in board.getEmptySquares():
             
-            board.mark(row, col)
+            board.mark(row, col, player)
 
-            cost = self.evalBoard(board, not isMax, player)
+            cost = self.evalBoard(board, not isMax, self.playerSwitch(player))
 
-            # Backtrack
             board.unmark(row, col)
 
-            if (isMax):
-
-                if (cost > bestCost):
-                    bestCost = cost
-            
-            else:
-                
-                if (cost < bestCost):
-                    bestCost = cost
+            if (self.comp(cost, bestCost, isMax)):
+                bestCost = cost
 
         return bestCost
 
@@ -73,30 +73,31 @@ class AI:
     #Find best move
     def bestMove(self, game):
 
-        #Could avoid copying to save memory, but this is safer
+        #Could mutate the board directly, but this is safer/cleaner
         board = game.board.deepCopy()
 
         player = game.nextToMove()
-        bestCost = float('-inf')
+        isMax = True if player == 'X' else False
+        bestCost = float('-inf') if isMax else float('inf')
         bestMove = None
 
         #Iterate through possible moves
         for row, col in board.getEmptySquares():
 
-            board.mark(row, col)
+            board.mark(row, col, player)
 
-            cost = self.evalBoard(board, False, player)
+            cost = self.evalBoard(board, isMax, self.playerSwitch(player))
 
             board.unmark(row, col)
 
-            if (cost > bestCost):
+            if (self.comp(cost, bestCost, isMax)):
                 bestCost = cost
                 bestMove = (row, col)
 
         return bestMove
     
 
-    # All-in-one
+    # All-in-one, calculates cost while finding the best move. Mutates the board!
     # def findMove(self, game):
         
     #     board = game.board

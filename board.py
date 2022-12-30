@@ -16,7 +16,8 @@ class Board:
         board = Board()
 
         for row, col, player in self.fetch():
-            board.mark(row, col, player)
+            if (player != '?'):
+                board.mark(row, col, player)
 
         return board
 

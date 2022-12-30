@@ -26,9 +26,7 @@ def drawLines():
 
 def drawBoard(game):
     
-    board = game.board
-
-    for row, col, player in board.fetch():
+    for row, col, player in game.board.fetch():
 
         # X
         if (player == 'X'):
@@ -50,16 +48,15 @@ def drawBoard(game):
             continue
     
 game = Game()
-ai = AI(1)
+ai = AI()
 
-time = 0
 
 def main():
 
-    time = 0
+
+    drawLines()
     while True:
 
-        drawLines()
         for event in pygame.event.get():
 
             if (event.type == pygame.QUIT):
@@ -71,24 +68,10 @@ def main():
                 row = int(pos[1] // SQUARE_SIZE)
                 col = int(pos[0] // SQUARE_SIZE)
 
-
-                game.mark(row, col)
-                move = ai.bestMove(game)
-                row, col = move
                 game.mark(row, col)
                 
 
         drawBoard(game)
         pygame.display.update()
 
-
-# game.mark(0, 1)
-# game.mark(2, 2)
-# game.mark(1, 1)
-# game.board.show()
-# cost, move = ai.findMove(game)
-
-
-
-        
 main()
