@@ -7,8 +7,18 @@ class Game:
         self.ai = False
         self.player = 'X'
         self.board = Board()
+        self.exists = False
         pass
 
+    def exists(self):
+        return self.exists
+
+    def start(self):
+        self.exists = True
+
+    def finish(self):
+        self.player = 'X'
+        self.exists = False
 
     def nextToMove(self):
         return self.player
@@ -23,12 +33,9 @@ class Game:
             return
 
         self.board.mark(row, col, self.player)
-        self.switchPlayer()
-        # self.board.show()
 
     def unmark(self, row, col):
         self.board.unmark(row, col)
-        self.switchPlayer()
 
     def switchPlayer(self):
         if (self.player == 'X'):

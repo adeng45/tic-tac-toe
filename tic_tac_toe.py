@@ -7,11 +7,13 @@ from ai import AI
 from constants import * 
 
 #Initialization 
-pygame.init()
-screen = pygame.display.set_mode( (WIDTH, HEIGHT) )
-pygame.display.set_caption('<Tic-Tac-Toe>')
-screen.fill(BOARD_COLOR)
+def init():
+    pygame.init()
+    screen = pygame.display.set_mode( (WIDTH, HEIGHT) )
+    pygame.display.set_caption('<Tic-Tac-Toe>')
 
+def colorBoard(screen, color):
+    screen.fill(BOARD_COLOR)
 
 def drawLines():
 
@@ -22,7 +24,6 @@ def drawLines():
     #Vertical
     for j in range(1, COLS):
         pygame.draw.line(screen, LINE_COLOR, (j * SQUARE_SIZE, 0), (j * SQUARE_SIZE, HEIGHT), LINE_WIDTH)
-
 
 def drawBoard(game):
     
@@ -47,31 +48,107 @@ def drawBoard(game):
         else:
             continue
     
-game = Game()
-ai = AI()
+def vspace():
+    print()
+    print()
+
+def terminalEngine(game):
+
+    game.start()
+
+    while (not game.isOver()):
+
+        game.board.show()
+        print('Your move!')
+
+        squareNumber = None
+
+        while ( not (isinstance(squareNumber, str) and len(squareNumber) > 0 and 1 <= int(squareNumber) <= 9) ):
+
+            if (squareNumber != None):
+                vspace()
+                print('Invalid square number, try again!')
+
+            squareNumber = input()
 
 
-def main():
+        row = (int(squareNumber) - 1) // COLS
+        col = (int(squareNumber) - 1) % COLS
 
+        #Square is already played
+        if (not game.board.isSquareEmpty(row, col)):
+            vspace()
+            print('That square is already taken, try again!')
+            vspace()
+            continue
+            
+        game.mark(row, col)
+        game.switchPlayer()
+        vspace()
 
-    drawLines()
-    while True:
+    
+    game.board.show()
+    game.finish()
+    print('Player {0} wins!'.format(game.board.winner()))
 
-        for event in pygame.event.get():
+def GUIEngine(game):
+
+    for event in pygame.event.get():
 
             if (event.type == pygame.QUIT):
                 pygame.quit()
-                sys.exit()
+                cont = False
+                break
 
             if (event.type == pygame.MOUSEBUTTONDOWN):
                 pos = event.pos
                 row = int(pos[1] // SQUARE_SIZE)
                 col = int(pos[0] // SQUARE_SIZE)
 
-                game.mark(row, col)
-                
+                game.mark(row, col) 
+                game.switchPlayer()
 
-        drawBoard(game)
-        pygame.display.update()
+        if (cont):
+            drawBoard(game)
+            pygame.display.update()
+
+
+def main():
+
+    #Introduction
+    print("Let's play tic-tac-toe!")
+    print("Use -help if you are stuck!")
+
+    game = Game()
+
+    while True:
+        
+        cmd = input()
+
+        match cmd:
+            
+            case '-help':
+                print('-ai: toggle ai')
+                print('-i: play on gui')
+                print('-t: play in terminal')
+            
+            #Toggle ai
+            case '-ai':
+                if (not game.exists()):
+                    print('Game does not exist!')
+
+            case '-i':
+                pass
+            
+            case '-t':
+                print()
+                print("To play a move, pick a square number (1-9).")
+                print()
+                terminalEngine(game)
+
+            case _:
+                print('Unknown command :(')
+    
+
 
 main()

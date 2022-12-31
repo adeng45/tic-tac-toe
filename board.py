@@ -21,6 +21,8 @@ class Board:
 
         return board
 
+    def isSquareEmpty(self, row, col):
+        return (row, col) in self.emptySquares
 
     def getEmptySquares(self):
         return self.emptySquares
