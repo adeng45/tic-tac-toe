@@ -6,6 +6,9 @@ class AI:
     def __init__(self, level=0):
         self.level = level
 
+    def changeLevel(self, level):
+        self.level = level
+
     def randomSquare(self, board):
 
         empty = list(board.emptySquares())
@@ -106,6 +109,14 @@ class AI:
                 bestMove = (row, col)
 
         return bestMove
+
+    def getMove(self, game):
+
+        if (self.level == 0):
+            return self.randomSquare(game.board)
+
+        else: 
+            return self.bestMove(game)
     
 
     # #All-in-one, calculates cost while finding the best move. Mutates the board!

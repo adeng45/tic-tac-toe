@@ -5,20 +5,20 @@ class Game:
     
     def __init__(self):
         self.ai = False
+        self.autoplay = False
         self.player = 'X'
+        self.firstMove = True
         self.board = Board()
         self.exists = False
-        pass
+
+    def setFirstMove(self, isLast):
+        if (isLast):
+            self.firstMove = False
+        else:
+            self.firstMove = True
 
     def exists(self):
         return self.exists
-
-    def start(self):
-        self.exists = True
-
-    def finish(self):
-        self.player = 'X'
-        self.exists = False
 
     def nextToMove(self):
         return self.player

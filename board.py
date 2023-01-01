@@ -34,13 +34,16 @@ class Board:
         self.arr[row][col] = '?'
         self.emptySquares.add( (row, col) )
 
-
     def mark(self, row, col, player):
         self.arr[row][col] = player
         self.emptySquares.remove( (row, col) )
 
     def clear(self):
         self.arr = np.full( (ROWS, COLS) , '?')
+        self.emptySquares = set()
+        for row in range(ROWS):
+            for col in range(COLS):
+                self.emptySquares.add( (row, col) )
 
     def show(self):
 
