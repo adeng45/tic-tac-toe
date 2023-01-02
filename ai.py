@@ -3,7 +3,7 @@ import random
 
 class AI:
 
-    def __init__(self, level=0):
+    def __init__(self, level=1):
         self.level = level
 
     def changeLevel(self, level):
@@ -11,7 +11,7 @@ class AI:
 
     def randomSquare(self, board):
 
-        empty = list(board.emptySquares())
+        empty = list(board.getEmptySquares())
         idx = random.randint(0, len(empty) - 1)
 
         return empty[idx]
@@ -112,7 +112,7 @@ class AI:
 
     def getMove(self, game):
 
-        if (self.level == 0):
+        if (self.level == 1):
             return self.randomSquare(game.board)
 
         else: 

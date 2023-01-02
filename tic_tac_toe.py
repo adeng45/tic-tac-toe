@@ -58,41 +58,66 @@ def terminalEngine(game, ai):
     print("To play a move, pick a square number (1-9).")
     vspace()
 
+    firstPlayer = game.nextToMove()
+
+    #If the player goes last.
+    if (not game.firstMove):
+        game.switchPlayer()
+        row, col = ai.getMove(game)
+        game.mark(row, col)
+        game.switchPlayer()
+
     while (not game.isOver()):
         
         vspace()
         game.board.show()
         print('Your move!')
 
-        squareNumber = None
+        cmd = None
 
-        while ( not (isinstance(squareNumber, str) and len(squareNumber) > 0 and 1 <= int(squareNumber) <= 9) ):
+        while ( not ( (cmd == 'ai') or (cmd == '-e') or (isinstance(cmd, str) and len(cmd) > 0 and 1 <= int(cmd) <= 9) ) ):
 
-            if (squareNumber != None):
+            if (cmd != None):
                 vspace()
-                print('Invalid square number, try again!')
+                print('Invalid command, try again!')
 
-            squareNumber = input()
+            cmd = input()
 
+        #Go back to main menu.
+        if (cmd == '-e'):
+            game.board.clear()
+            game.setPlayer(firstPlayer)
+            return
 
-        row = (int(squareNumber) - 1) // COLS
-        col = (int(squareNumber) - 1) % COLS
+        #AI move.
+        elif (cmd == 'ai'):
+            row, col = ai.getMove(game)
 
-        #Square is already played
+        #Human selected move.
+        else:
+            row = (int(cmd) - 1) // COLS
+            col = (int(cmd) - 1) % COLS
+
+        #Square is already played.
         if (not game.board.isSquareEmpty(row, col)):
             vspace()
             print('That square is already taken, try again!')
             vspace()
             continue
-            
+
         game.mark(row, col)
         game.switchPlayer()
 
+        #Autoplay enabled.
+        if (not game.isOver() and game.autoplay):
+            row, col = ai.getMove(game)
+            game.mark(row, col)
+            game.switchPlayer()
     
     game.board.show()
     print('Player {0} wins!'.format(game.board.winner()))
     game.board.clear()
-    game.switchPlayer()
+    game.setPlayer(firstPlayer)
 
 def GUIEngine(game, ai):
 
@@ -100,10 +125,13 @@ def GUIEngine(game, ai):
     colorBoard(screen, BOARD_COLOR)
     drawLines(screen)
 
+    firstPlayer = game.nextToMove()
+
+    #If the player goes last.
     if (not game.firstMove):
         game.switchPlayer()
-        move = ai.getMove(game)
-        game.mark(move[0], move[1])
+        row, col = ai.getMove(game)
+        game.mark(row, col)
         game.switchPlayer()
 
     while (not game.isOver()):
@@ -115,6 +143,9 @@ def GUIEngine(game, ai):
 
             if (event.type == pygame.QUIT):
                 pygame.quit()
+                game.board.clear()
+                if (game.nextToMove != firstPlayer):
+                    game.switchPlayer()
                 return
 
             if (event.type == pygame.MOUSEBUTTONDOWN):
@@ -124,9 +155,10 @@ def GUIEngine(game, ai):
 
                 if (game.board.isSquareEmpty(row, col)):
                     game.mark(row, col) 
-                    game.switchPlayer()
+                    game.switchPlayer() 
 
-                    if (game.ai):
+                    #Autoplay is always enforced in GUI mode. The only thing to check, then, is if the AI is turned on.
+                    if (not game.isOver() and game.ai):
                         move = ai.getMove(game)
                         game.mark(move[0], move[1])
                         game.switchPlayer()
@@ -136,6 +168,7 @@ def GUIEngine(game, ai):
 
     print('Player {0} wins!'.format(game.board.winner()))
     game.board.clear()
+    game.setPlayer(firstPlayer)
 
     pygame.quit()
 
@@ -163,13 +196,15 @@ def main():
                 print('-s: change settings')
                 print('-e: exit')
 
-
+            #Run GUI version.
             case '-g':
                 GUIEngine(game, ai)
             
+            #Run terminal version.
             case '-t':
                 terminalEngine(game, ai)
             
+            #Settings menu.
             case '-s':
                 vspace()
                 print('Change player 1, enter X or O.')
@@ -184,12 +219,14 @@ def main():
 
                     cmd = input()
 
+                    #Change players.
                     if (cmd == 'X' or cmd == 'O'):
                         if (not game.nextToMove() == cmd):
                             game.switchPlayer()
                         vspace()
                         print('Player 1 is now {0}!'.format(cmd))
                     
+                    #Change move order.
                     elif (cmd == '1' or cmd == '2'):
 
                         isLast = int(cmd) - 1
@@ -197,6 +234,13 @@ def main():
                         vspace()
                         print('Player 1 now goes {}!'.format('last' if isLast else 'first'))
 
+                        #If player moves last and AI is not activated, AI is turned on. (Can't have the first move be left to no one!)
+                        if (isLast and not game.ai):
+                            game.ai = True
+                            ai.changeLevel(1)
+                            print('AI Brainless is now your opponent!')
+
+                    #Turn AI on/off, change AI difficulty.
                     elif (cmd == '-ai 0' or cmd == '-ai 1' or cmd == '-ai 2'):
 
                         difficulty = int(cmd.split(' ')[1])
@@ -210,7 +254,9 @@ def main():
                             vspace()
                             print('AI {} is now your opponent!'.format('Brainless' if difficulty == 1 else 'AlphaZero'))
 
+                    #Turn on/off autoplay.
                     elif (cmd == '-a' or cmd == '-a -s'):
+                        
                         if (cmd == '-a'):
                             game.autoplay = True
                         else:
@@ -218,6 +264,13 @@ def main():
                         vspace()
                         print('Autoplay turned {}!'.format('on' if cmd == '-a' else 'off'))
 
+                        #If autoplay is turned on and AI is not activated, turn on AI. 
+                        if (game.autoplay and not game.ai):
+                            game.ai = True
+                            ai.changeLevel(1)
+                            print('AI Brainless is now your opponent!')
+
+                    #Exit settings menu.
                     elif (cmd == '-s'):
                         break
 

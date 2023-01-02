@@ -17,8 +17,8 @@ class Game:
         else:
             self.firstMove = True
 
-    def exists(self):
-        return self.exists
+    def setPlayer(self, player):
+        self.player = player
 
     def nextToMove(self):
         return self.player
