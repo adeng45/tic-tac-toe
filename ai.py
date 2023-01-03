@@ -6,9 +6,11 @@ class AI:
     def __init__(self, level=1):
         self.level = level
 
+    #Sets the difficulty of the AI to level.
     def changeLevel(self, level):
         self.level = level
 
+    #Returns a random square that is empty on the given board.
     def randomSquare(self, board):
 
         empty = list(board.getEmptySquares())
@@ -16,24 +18,7 @@ class AI:
 
         return empty[idx]
 
-    #Handles comparison between two values dependent on min/max objective
-    def comp(self, cost, currCost, isMax):
-        
-        if (isMax):
-            return cost > currCost
-
-        else:
-            return cost < currCost
-
-
-    def playerSwitch(self, player):
-        if (player == 'X'):
-            return 'O'
-
-        else:
-            return 'X'
-
-    #Returns the value of the game without looking into future possibilities
+    #Returns the value of the game WITHOUT LOOKING INTO FUTURE POSSIBILITIES.
     def staticEval(self, board):
 
         winner = board.winner()
@@ -47,8 +32,7 @@ class AI:
         else:
            return 0
 
-
-    # Helper function for evalGame, evaluates the board
+    #Evaluates the board using the minimax algorithm, exhaustively exploring the game space. 
     def evalBoard(self, board, isMax, player, depth):
 
         value = self.staticEval(board)
@@ -64,21 +48,20 @@ class AI:
             
             board.mark(row, col, player)
 
-            cost, depth = self.evalBoard(board, not isMax, self.playerSwitch(player), depth + 1)
+            cost, depth = self.evalBoard(board, not isMax, self._playerSwitch(player), depth + 1)
 
             board.unmark(row, col)  
 
             if (cost == bestCost and depth < bestDepth):
                 bestDepth = depth
 
-            if (self.comp(cost, bestCost, isMax)):
+            if (self._comp(cost, bestCost, isMax)):
                 bestCost = cost
                 bestDepth = depth
 
         return bestCost, bestDepth
 
-
-    #Find best move
+    #Finds the best move for the given game.
     def bestMove(self, game):
 
         #Could mutate the board directly, but this is safer/cleaner
@@ -95,7 +78,7 @@ class AI:
 
             board.mark(row, col, player)
 
-            cost, depth = self.evalBoard(board, isMax, self.playerSwitch(player), 2)
+            cost, depth = self.evalBoard(board, isMax, self._playerSwitch(player), 2)
 
             board.unmark(row, col)
 
@@ -103,13 +86,14 @@ class AI:
                 bestDepth = depth
                 bestMove = (row, col)
 
-            if (self.comp(cost, bestCost, isMax)):
+            if (self._comp(cost, bestCost, isMax)):
                 bestCost = cost
                 bestDepth = depth
                 bestMove = (row, col)
 
         return bestMove
 
+    #Gets a move for the given game, with respect to the AI difficulty.
     def getMove(self, game):
 
         if (self.level == 1):
@@ -117,7 +101,25 @@ class AI:
 
         else: 
             return self.bestMove(game)
-    
+
+    #HELPER: A function to switch between the two players.
+    def _playerSwitch(self, player):
+        if (player == 'X'):
+            return 'O'
+
+        else:
+            return 'X'
+
+    #HELPER: Handles comparison between two values depending on the given min/max objective.
+    def _comp(self, cost, currCost, isMax):
+        
+        if (isMax):
+            return cost > currCost
+
+        else:
+            return cost < currCost
+
+
 
     # #All-in-one, calculates cost while finding the best move. Mutates the board!
     # def bestMoveAndCost(self, game):

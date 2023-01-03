@@ -1,20 +1,23 @@
 import sys
 import pygame
+import time
 
 from game import Game
 from ai import AI
 from constants import * 
 
-#Initialization 
+#Initialization of the pygame Surface object (screen)
 def pygameInit():
     pygame.init()
     screen = pygame.display.set_mode( (WIDTH, HEIGHT) )
     pygame.display.set_caption('<Tic-Tac-Toe>')
     return screen
 
+#Colors the screen with the given color.
 def colorBoard(screen, color):
     screen.fill(BOARD_COLOR)
 
+#Draws the lines for the tic-tac-toe board.
 def drawLines(screen):
 
     #Horizontal
@@ -25,33 +28,98 @@ def drawLines(screen):
     for j in range(1, COLS):
         pygame.draw.line(screen, LINE_COLOR, (j * SQUARE_SIZE, 0), (j * SQUARE_SIZE, HEIGHT), LINE_WIDTH)
 
+#Draws the current state of the board onto the screen.
 def drawBoard(screen, game):
+
+    winner, x, y = game.board.winnerAndPlace()
+    winningSquares = set()
+
+    #Horizontal win
+    if (x != None and y == None):
+        for col in range(COLS):
+            winningSquares.add( (x, col) )
+
+    #Vertical win
+    elif (x == None and y != None):
+        for row in range(ROWS):
+            winningSquares.add( (row, y) )
+
+    #Top-left to bottom-right diagonal
+    elif (x == 1 and y == 1):
+        for i in range(ROWS):
+            winningSquares.add( (i, i) )
+
+    #Top-right to bottom-left diagonal
+    else:
+        for i in range(ROWS):
+            winningSquares.add( (WIDTH - i - 1, i) )
     
     for row, col, player in game.board.fetch():
 
         # X
         if (player == 'X'):
+
+            color = RED if (row, col) in winningSquares else CROSS_COLOR
+
             topLeft = (col * SQUARE_SIZE + OFFSET, row * SQUARE_SIZE + OFFSET)
             bottomRight = (col * SQUARE_SIZE + SQUARE_SIZE - OFFSET, row * SQUARE_SIZE + SQUARE_SIZE - OFFSET)
-            pygame.draw.line(screen, CROSS_COLOR, topLeft, bottomRight, CROSS_WIDTH)
+            pygame.draw.line(screen, color, topLeft, bottomRight, CROSS_WIDTH)
 
             bottomLeft = (col * SQUARE_SIZE + OFFSET, row * SQUARE_SIZE + SQUARE_SIZE - OFFSET)
             topRight = (col * SQUARE_SIZE + SQUARE_SIZE - OFFSET, row * SQUARE_SIZE + OFFSET)
-            pygame.draw.line(screen, CROSS_COLOR, bottomLeft, topRight, CROSS_WIDTH)
+            pygame.draw.line(screen, color, bottomLeft, topRight, CROSS_WIDTH)
 
         # O
         elif (player == 'O'):
+
+            color = YELLOW if (row, col) in winningSquares else CIRCLE_COLOR
+
             center = ( col * SQUARE_SIZE + SQUARE_SIZE / 2 , row * SQUARE_SIZE + SQUARE_SIZE / 2 )
-            pygame.draw.circle(screen, CIRCLE_COLOR, center, CIRCLE_RADIUS, CIRCLE_WIDTH)
+            pygame.draw.circle(screen, color, center, CIRCLE_RADIUS, CIRCLE_WIDTH)
 
         # None
         else:
             continue
     
+#Draws the winning line!
+def drawWinningLine(screen, x, y):
+
+    end = OFFSET
+
+    #Horizontal win
+    if (x != None and y == None):
+        while (end < WIDTH - OFFSET):
+            pygame.draw.line(screen, LINE_COLOR, (OFFSET, x * SQUARE_SIZE + 0.5 * SQUARE_SIZE), (end, x * SQUARE_SIZE  + 0.5 * SQUARE_SIZE), int(LINE_WIDTH * 0.5))
+            pygame.display.update()
+            end += 0.5
+
+    #Vertical win
+    elif (x == None and y != None):
+        while (end < HEIGHT - OFFSET):
+            pygame.draw.line(screen, LINE_COLOR, (y * SQUARE_SIZE + 0.5 * SQUARE_SIZE, OFFSET), (y * SQUARE_SIZE + 0.5 * SQUARE_SIZE, end), int(LINE_WIDTH * 0.5))
+            pygame.display.update()
+            end += 0.5
+
+    #Top-left to bottom-right diagonal
+    elif (x == 1 and y == 1):
+        while (end < WIDTH - OFFSET):
+            pygame.draw.line(screen, LINE_COLOR, (OFFSET, OFFSET), (end, end), int(LINE_WIDTH * 0.5))
+            pygame.display.update()
+            end += 0.5
+
+    #Top-right to bottom-left diagonal
+    else:
+        while (end < HEIGHT - OFFSET):
+            pygame.draw.line(screen, LINE_COLOR, (WIDTH - OFFSET, OFFSET), (WIDTH - end, end), int(LINE_WIDTH * 0.5))
+            pygame.display.update()
+            end += 0.5
+
+#2 print statements worth of vertical space.
 def vspace():
     print()
     print()
 
+#Game engine (terminal)
 def terminalEngine(game, ai):
 
     vspace()
@@ -119,6 +187,7 @@ def terminalEngine(game, ai):
     game.board.clear()
     game.setPlayer(firstPlayer)
 
+#Game engine (GUI)
 def GUIEngine(game, ai):
 
     screen = pygameInit()
@@ -170,9 +239,12 @@ def GUIEngine(game, ai):
     game.board.clear()
     game.setPlayer(firstPlayer)
 
+    pygame.display.update()
+    time.sleep(0.5)
+
     pygame.quit()
 
-
+#Master
 def main():
 
     game = Game()
@@ -212,6 +284,16 @@ def main():
                 print('Turn on AI and set difficulty, enter -ai 1/-ai 2. Enter -ai 0 to turn off.')
                 print('Autoplay, enter -a. Enter -a -s to turn off.')
                 print('Enter -s to exit settings')
+
+                print() 
+                print('Player 1 is {}.'.format(game.nextToMove()))
+                print('Player 1 is the {} to move.'.format('first' if game.firstMove else 'last'))
+                if (game.ai):
+                    print('Your current opponent is AI {}.'.format('Brainless' if ai.level == 1 else 'AlphaZero'))
+                else:
+                    print('AI is currently off.')
+                print('Autoplay is {}.'.format('on' if game.autoplay else 'off'))
+                
 
                 cmd = None
 
